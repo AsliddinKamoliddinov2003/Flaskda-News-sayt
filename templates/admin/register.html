@@ -1,0 +1,56 @@
+{% extends "admin/base.html" %}
+
+{% block main %}
+
+<div class="container">
+   <div class="row">
+       <div class="col-6 col-sm-6 offset-3">
+           <div class="card p-4 m-5">
+               {% include "includes/masseges.html" %}
+               <form action="{{url_for('register')}}" method="post">
+                   <label for="fullname" class="form-label">{{forma.fullname.label}}</label>
+               <div class="input-group mb-3">
+                 {{forma.fullname}}
+               </div>
+
+               {% for error in forma.fullname.errors %}
+                  <li>{{error}}</li>
+               {% endfor %}
+
+               <label for="username" class="form-label"> {{forma.username.label}}</label>
+               <div class="input-group mb-3">
+                  {{forma.username}}
+               </div>
+
+               {% for error in forma.username.errors %}
+                  <li>{{error}}</li>
+               {% endfor %}
+               
+               <label for="password1" class="form-label">{{forma.password.label}}</label>
+               <div class="input-group mb-3">
+                  {{forma.password}}
+               </div>
+
+               {% for error in forma.password.errors %}
+                  <li>{{error}}</li>
+               {% endfor %}
+
+               <label for="password2" class="form-label">
+                  {{forma.password2.label}}
+               </label>
+               <div class="input-group mb-3">
+                  {{forma.password2}}
+               </div>
+
+               {% for error in forma.password2.errors %}
+                  <li>{{error}}</li>
+               {% endfor %}
+
+               <input type="submit" value="Login" class="btn btn-success" />
+               <a href="{{url_for('login')}}" class="btn btn-secondary">Register</a>
+            </form>
+         </div>
+      </div>
+   </div>
+</div>
+{% endblock %}
