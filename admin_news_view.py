@@ -11,7 +11,7 @@ from forms import Newsform, UserRegister
 
     
 @app.route("/admin/news/")
-@login_required
+# @login_required
 def admin_news_list_view():
     
     if ('action' and '_id') in request.args:
@@ -49,7 +49,7 @@ def admin_news_list_view():
     return render_template("admin/news_list.html",yangiliklar=all_news)
 
 @app.route("/admin/news/create/",methods=['GET','POST'])
-@login_required
+# @login_required
 def add_news_view():
 
     if request.method=="POST":
@@ -88,7 +88,7 @@ def add_news_view():
     return render_template("admin/add_news.html")
 
 @app.route("/admin/category/create/", methods=["GET","POST"])
-@login_required
+# @login_required
 def add_category_view():
     form=Newsform(request.form)
     if request.method=="POST" and form.validate():
@@ -99,7 +99,7 @@ def add_category_view():
     return render_template("admin/add_category.html",form=form)
 
 @app.route("/admin/category/<int>:_id/update/", methods=["GET","POST"])
-@login_required
+# @login_required
 def update_category_view(_id):
     cat=Category.query.filter_by(id=int(_id)).first_or_404()
     form=Newsform(request.form,obj=cat)
@@ -111,7 +111,7 @@ def update_category_view(_id):
     return render_template("admin/add_category.html",form=form)
 
 @app.route("/admin/news/<int:_id>/",methods=["GET","POST"])
-@login_required
+# @login_required
 def update_news_view(_id):
     if request.method=="POST":
         print("Post bu")
@@ -161,12 +161,11 @@ def login():
 
         else:
             user=User.query.filter_by(username=username.strip()).first_or_404()
-            print(user)
 
             if bcrypt.checkpw(password.encode(),user.password):
-                flash("Siz kabinetga kirdingiz")
-                session['login']=username
-                session['password']=password.strip()
+                flash("Siz kabinetga kirdingiz","success")
+                session['login'] = username
+                session['password'] = password.strip()
                 login_user(user)
                 return redirect(url_for("admin_news_list_view"))
             else:
@@ -177,23 +176,39 @@ def login():
 
 @app.route("/register/", methods=["GET","POST"])
 def register():
-    form = UserRegister(request.form)
-    if request.method=="POST" and form.validate():
-        user=User(
-            fullname=form.fullname.data,
-            username=form.username.data,
-            password=bcrypt.hashpw(form.password.data.encode(),bcrypt.gensalt(14))
-        )
-        db.session.add(user)
-        db.session.commit()
-        flash("Registratsiyadan o'tdingiz ","success")
-    elif request.method=="POST":
-        flash("Registratsiyadan o'tmadingiz","danger")
+    if request.method == "POST":
+        fullname = request.form.get("fullname", None)
+        username = request.form.get("username", None)
+        password1 = request.form.get("password1", None)
+        password2 = request.form.get("password2", None)
+
+        if not username:
+            flash("username kiritilmadi!", "danger")
+            return render_template("admin/register.html")
         
-    return render_template("admin/register.html",forma=form)
+        if not password1 or not password2:
+            flash("parolni to'g'ri kiriting", "danger")
+            return render_template("admin/register.html")
+
+        elif password1 and password2 and password1.strip() != password2.strip():
+            flash("Parollar mos kelmayapti!", "danger")
+            return render_template("admin/register.html")
+
+        else:
+            user = User()
+            user.username = username
+            if fullname:
+                user.fullname = fullname
+                user.password = bcrypt.hashpw(password1.strip().encode(), bcrypt.gensalt())
+                db.session.add(user)
+                db.session.commit()
+                flash("Siz ro'yhatdan o'tdingiz!", "success")
+            return render_template("admin/register.html")
+
+    return render_template("admin/register.html")
+    
 
 @app.route("/logout/")
-@login_required
 def logout():
     logout_user()
     return redirect(url_for('login'))

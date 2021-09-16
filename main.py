@@ -1,4 +1,5 @@
 from config import app,login_manager
+from flask import Flask
 
 
 @login_manager.user_loader
